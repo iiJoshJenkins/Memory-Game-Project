@@ -20,20 +20,19 @@ body {
     INSTRUCTIONS
 */
 
-
+@media screen and (max-width: 400px){
+    .instructionsContainer {
+        overflow-y: scroll;
+    }
+}
 .instructionsContainer {
     padding: 30px;
 }
 
 .backToMainMenu {
-    position: absolute;
-    top: 95%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
     text-decoration: none;
-    width: 30%;
-    height: 10%;
-    padding-top: 5%
 }
 
 /*
@@ -45,8 +44,10 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    min-width: 30%;
-    min-height: 30%;
+    min-width: 200px;
+    min-height: 100px;
+    max-height: 90%;
+    max-width: 90%;
     border: 1px solid #ada8ad;
     border-radius: 25px;
     box-shadow: 5px 5px #ada8ad;

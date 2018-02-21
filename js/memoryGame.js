@@ -9,40 +9,71 @@ function createMenu(title, ...menuOptions){
     menuTitle.innerHTML = `<strong> ${title} </strong>`;
     menuContainer.appendChild(menuTitle);
 
-    const menuOptionsList = document.createElement('ul');
-    menuOptionsList.setAttribute('class', 'menuOptionsList');
-    for(let i = 0; i < menuOptions.length; i++){
-        const optionsItem = document.createElement('li');
-        const itemTitle = document.createElement('h3');
-        itemTitle.innerHTML = menuOptions[i];
+    if(menuOptions.length > 0){
+        const menuOptionsList = document.createElement('ul');
+        menuOptionsList.setAttribute('class', 'menuOptionsList');
+        for(let i = 0; i < menuOptions.length; i++){
+            const optionsItem = document.createElement('li');
+            const itemTitle = document.createElement('h3');
+            itemTitle.innerHTML = menuOptions[i];
 
-        optionsItem.appendChild(itemTitle);
-        menuOptionsList.appendChild(optionsItem);
+            optionsItem.appendChild(itemTitle);
+            menuOptionsList.appendChild(optionsItem);
+        }
+
+        menuOptionsList.addEventListener('mouseover', e => hoverOver(e, 'in'));
+        menuOptionsList.addEventListener('mouseout', e => hoverOver(e, 'out'));
+
+        menuContainer.appendChild(menuOptionsList);
     }
-    menuContainer.appendChild(menuOptionsList);
-
-    menuOptionsList.addEventListener('mouseover', e => hoverOver(e, 'in'));
-
-    menuOptionsList.addEventListener('mouseout', e => hoverOver(e, 'out'));
 
     return menuContainer;
 }
 
-const startMenu = createMenu("Memory Game", "Play", "Instructions"),
-      difficultyMenu = createMenu("Difficulty", "Easy", "Medium", "Hard");
+function createGame(amountOfCards){
+    const gameMenu = createMenu("Memory Game");
+    gameContainer.appendChild(gameMenu);
+}
+
+const startMenu = createMenu("Memory Game", "Play", "Instructions");
 
 document.addEventListener('DOMContentLoaded', e => {
+    const gameContainer = document.getElementById('gameContainer');
     document.getElementById('gameContainer').appendChild(startMenu);
 
     startMenu.addEventListener('click', e => {
-        let target = e.target,
-            nodeName = target.nodeName.toLowerCase(),
-            option;
+        const target = e.target,
+            nodeName = target.nodeName.toLowerCase();
+        let option;
         if(nodeName == 'li' || nodeName == 'h3'){
             option = nodeName == 'li' ? target.firstElementChild.innerText : target.innerText;
-            document.getElementById('gameContainer').innerHTML = '';
+            gameContainer.innerHTML = '';
             if(option == 'Play'){
-                document.getElementById('gameContainer').appendChild(difficultyMenu);
+                const difficultyMenu = createMenu("Difficulty", "Easy", "Normal", "Hard");
+                gameContainer.appendChild(difficultyMenu);
+                difficultyMenu.addEventListener('click', e => {
+                    const target = e.target,
+                          nodeName = target.nodeName.toLowerCase();
+                    let option;
+                    if(nodeName == 'li' || nodeName == 'h3'){
+                        option = nodeName == 'li' ? target.firstElementChild.innerText : target.innerText;
+                        gameContainer.innerHTML = '';
+                        console.log(option);
+                        switch(option){
+                            case 'Easy':
+                                createGame(9);
+                                break;
+                            case 'Normal':
+                                createGame(16);
+                                break;
+                            case 'Hard':
+                                createGame(20);
+                                break;
+                            default:
+                                console.log("ERROR: Somehow an option wasn't pressed");
+                        }
+                    }
+                });
             }
             else if(option == 'Instructions'){
                 window.location.href = 'instructions.html';
@@ -68,17 +99,13 @@ function hoverOver(event, inOrOut){
                 if(nodeName == 'h3') target = target.parentElement;
                     target.classList.add('hovered');
             }
-            else{
-                return;
-            }
+            else return;
         }
         else if(inOrOut == 'out'){
             if(target.classList.contains('hovered')){
                 target.classList.remove('hovered');
             }
-            else{
-                return;
-            }
+            else return;
         }
     }
 }
