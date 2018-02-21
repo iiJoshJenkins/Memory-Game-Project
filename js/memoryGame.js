@@ -1,4 +1,3 @@
-
 // Trying to dynamically create menus.
 // Will return the DOM object needed to append straight to the body.
 function createMenu(title, ...menuOptions){
@@ -29,10 +28,27 @@ function createMenu(title, ...menuOptions){
     return menuContainer;
 }
 
-let testMenu = createMenu("test", "a", "b", "c");
+const startMenu = createMenu("Memory Game", "Play", "Instructions"),
+      difficultyMenu = createMenu("Difficulty", "Easy", "Medium", "Hard");
 
-document.addEventListener('DOMContentLoaded', function(){
-    document.getElementById('gameContainer').appendChild(testMenu);
+document.addEventListener('DOMContentLoaded', e => {
+    document.getElementById('gameContainer').appendChild(startMenu);
+
+    startMenu.addEventListener('click', e => {
+        let target = e.target,
+            nodeName = target.nodeName.toLowerCase(),
+            option;
+        if(nodeName == 'li' || nodeName == 'h3'){
+            option = nodeName == 'li' ? target.firstElementChild.innerText : target.innerText;
+            document.getElementById('gameContainer').innerHTML = '';
+            if(option == 'Play'){
+                document.getElementById('gameContainer').appendChild(difficultyMenu);
+            }
+            else if(option == 'Instructions'){
+                window.location.href = 'instructions.html';
+            }
+        }
+    });
 });
 
 
