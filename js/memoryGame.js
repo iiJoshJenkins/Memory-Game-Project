@@ -114,8 +114,7 @@ document.addEventListener('DOMContentLoaded', e => {
 /*
     CARD FUNCTIONS
 */
-// TODO: Make it so there's only one set of pairs per card
-// EG only 2 diamonds not 4.
+
 function generatePlayingCards(amountOfCards){
     // Need to write the rest of the board but this is a good start.
     let gameCards = new Array();
@@ -127,17 +126,20 @@ function generatePlayingCards(amountOfCards){
         // Also generate the cards we'll be using for the game.
         let random = Math.floor(Math.random() * cards.length);
         let card = cards[random];
+        // If the card pair is already in the gameCards
+        // Make the loop run another time so we can add another card
+        // TODO: Find out how to optimise this.
         if(gameCards.includes(cards[random])){
             i--;
         }else{
             gameCards.push(card, card);
         }
-
     }
     // Shuffle the array to randomise cards positons
     gameCards = shuffle(gameCards);
     return gameCards;
 }
+
 // Return a HTML list with all the cards inside
 function drawPlayingCards(playingCards){
     const gameBoard = document.createElement('ul');
