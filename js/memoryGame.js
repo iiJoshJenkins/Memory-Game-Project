@@ -8,7 +8,11 @@ const cards = [
     'cube',
     'leaf',
     'bicycle',
-    'bomb'
+    'bomb',
+    'bell',
+    'book',
+    'compass',
+    'globe'
 ];
 
 const difficultyMenu = {
@@ -110,7 +114,8 @@ document.addEventListener('DOMContentLoaded', e => {
 /*
     CARD FUNCTIONS
 */
-
+// TODO: Make it so there's only one set of pairs per card
+// EG only 2 diamonds not 4.
 function generatePlayingCards(amountOfCards){
     // Need to write the rest of the board but this is a good start.
     let gameCards = new Array();
@@ -122,7 +127,12 @@ function generatePlayingCards(amountOfCards){
         // Also generate the cards we'll be using for the game.
         let random = Math.floor(Math.random() * cards.length);
         let card = cards[random];
-        gameCards.push(card, card);
+        if(gameCards.includes(cards[random])){
+            i--;
+        }else{
+            gameCards.push(card, card);
+        }
+
     }
     // Shuffle the array to randomise cards positons
     gameCards = shuffle(gameCards);
@@ -188,7 +198,6 @@ function cardClick(event){
                 }
                 else{
                     setTimeout(function(){
-                        console.log('running')
                         for(let activeCard of activeCards){
                             // TODO: Add some sort of class or animation to show fail
                             activeCard.parentElement.classList.remove('open', 'show');
