@@ -31,7 +31,9 @@ const mainMenu = {
     }
 };
 
-let activeCards = new Array();
+let activeCards = new Array(),
+    currentMoves = 0,
+    starRating = 3;
 // Trying to dynamically create menus.
 // Will return the DOM object needed to append straight to the body.
 function createMenu(menuTemplate){
@@ -76,6 +78,7 @@ function createGame(amountOfCards){
     const gameHeader = document.createElement('header');
     const gameHeaderTitle = document.createElement('h1');
     gameHeaderTitle.innerHTML = `Memory Game!`;
+    gameHeaderTitle.setAttribute('class', 'gameTitle');
     gameHeader.appendChild(gameHeaderTitle);
 
     boardContainer.appendChild(gameHeader);
