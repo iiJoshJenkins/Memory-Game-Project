@@ -215,10 +215,10 @@ function cardClick(event){
 
 // This is the event handler for clicking a button in the options
 function menuClick(event, menuOptions){
-    gameContainer.innerHTML = '';
     let target = event.target,
           nodeName = target.nodeName.toLowerCase();
     if(nodeName == 'li' || nodeName == 'h3'){
+        gameContainer.innerHTML = '';
         if(nodeName == 'li'){
             target = target.firstChild;
         }
