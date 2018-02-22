@@ -1,20 +1,33 @@
 const gameContainer = document.getElementById('gameContainer');
+
+const cards = [
+    'diamond',
+    'paper-plane-o',
+    'anchor',
+    'bolt',
+    'cube',
+    'leaf',
+    'bicycle',
+    'bomb'
+];
+
 const difficultyMenu = {
     title: 'Difficulty',
     options : {
-        'Easy' : createGame(9),
+        'Easy' : createGame(4),
         'Normal' : createGame(16),
         'Hard' : createGame(20)
     }
-}
+};
 const mainMenu = {
     title: 'Memory Game',
     options : {
         'Play' : createMenu(difficultyMenu),
         'Instructions' : 'instructions.html'
     }
-}
+};
 
+let activeCards = new Array();
 // Trying to dynamically create menus.
 // Will return the DOM object needed to append straight to the body.
 function createMenu(menuTemplate){
@@ -53,11 +66,41 @@ function createMenu(menuTemplate){
 }
 
 function createGame(amountOfCards){
-    // Needs to return a dom element, for now just adding a header
-    const gameHeader = document.createElement('h1');
-    gameHeader.innerHTML = `Game created with ${amountOfCards} cards!`
+    const boardContainer = document.createElement('div');
+    boardContainer.setAttribute('class', 'boardContainer');
 
-    return gameHeader;
+    const gameHeader = document.createElement('header');
+    const gameHeaderTitle = document.createElement('h1');
+    gameHeaderTitle.innerHTML = `Memory Game!`;
+    gameHeader.appendChild(gameHeaderTitle);
+
+    boardContainer.appendChild(gameHeader);
+    // This just generates the cards array we'll be using
+    // TODO : Make the DOM elements to render the cards.
+    const playingCards = generatePlayingCards(amountOfCards);
+    const gameBoard = drawPlayingCards(playingCards);
+
+    let difficulty;
+    switch(amountOfCards){
+        case 4:
+            difficulty = 'easy';
+            break;
+        case 16:
+            difficulty = 'normal';
+            break;
+        case 20:
+            difficulty = 'hard';
+            break;
+        default:
+            console.log('Somehow a difficulty setting wasn\'t picked');
+    }
+
+    gameBoard.classList.add(difficulty);
+    gameBoard.addEventListener('click', e => cardClick(e));
+
+    boardContainer.appendChild(gameBoard);
+
+    return boardContainer;
 }
 
 document.addEventListener('DOMContentLoaded', e => {
@@ -65,8 +108,99 @@ document.addEventListener('DOMContentLoaded', e => {
 });
 
 /*
+    CARD FUNCTIONS
+*/
+
+function generatePlayingCards(amountOfCards){
+    // Need to write the rest of the board but this is a good start.
+    let gameCards = new Array();
+
+    // Have to divide the amount of cards by 2 so that
+    // We can get 2 of each card
+    for(let i = 0; i < amountOfCards / 2; i++){
+        // Get a random card from the cards list
+        // Also generate the cards we'll be using for the game.
+        let random = Math.floor(Math.random() * cards.length);
+        let card = cards[random];
+        gameCards.push(card, card);
+    }
+    // Shuffle the array to randomise cards positons
+    gameCards = shuffle(gameCards);
+    return gameCards;
+}
+// Return a HTML list with all the cards inside
+function drawPlayingCards(playingCards){
+    const gameBoard = document.createElement('ul');
+    gameBoard.setAttribute('class', 'gameBoard');
+    for(let card of playingCards){
+        let _card = document.createElement('li');
+        _card.setAttribute('class', 'card');
+
+        let _icon = document.createElement('i');
+        _icon.setAttribute('class', `fa fa-${card}`);
+        _card.appendChild(_icon);
+        gameBoard.appendChild(_card);
+    }
+    return gameBoard;
+}
+
+/*
     MISC FUNCTIONS
 */
+
+// TODO : Write my own way of shuffling the card array.
+// Shuffle function from http://stackoverflow.com/a/2450976
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+}
+
+function cardsMatch(){
+    return activeCards[0].className == activeCards[1].className;
+}
+
+function cardClick(event){
+    if(activeCards.length < 2){
+        let target = event.target,
+            nodeName = target.nodeName.toLowerCase();
+        if(nodeName == 'li' || nodeName.toLowerCase() == 'i'){
+            if(nodeName == 'i'){
+                target = target.parentElement;
+            }
+            if(!target.classList.contains('open') && !target.classList.contains('show')){
+                target.classList.add('open', 'show');
+                activeCards.push(target.firstChild);
+            }
+
+            if(activeCards.length == 2){
+                if(cardsMatch()){
+                    // TODO: Add some sort of class or animation to show success
+                    activeCards = [];
+                }
+                else{
+                    setTimeout(function(){
+                        console.log('running')
+                        for(let activeCard of activeCards){
+                            // TODO: Add some sort of class or animation to show fail
+                            activeCard.parentElement.classList.remove('open', 'show');
+                        }
+                        activeCards = [];
+                    }, 500);
+
+                }
+            }
+        }
+    }
+}
 
 // This is the event handler for clicking a button in the options
 function menuClick(event, menuOptions){
