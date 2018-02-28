@@ -31,9 +31,15 @@ const mainMenu = {
     }
 };
 
-let activeCards = new Array(),
-    currentMoves = 0,
-    starRating = 3;
+var activeCards,
+    currentMoves,
+    starRating,
+    gameDifficulty,
+    gameStarted,
+    remainingCards,
+    timePlayed,
+    timerInterval;
+
 // Trying to dynamically create menus.
 // Will return the DOM object needed to append straight to the body.
 function createMenu(menuTemplate){
@@ -54,6 +60,7 @@ function createMenu(menuTemplate){
         // Looping through the array and adding all the options to the list
         for(let option in menuTemplate.options){
             const optionsItem = document.createElement('li');
+            optionsItem.setAttribute('class', 'menuOption');
             const itemTitle = document.createElement('h3');
             itemTitle.innerHTML = option;
 
@@ -62,8 +69,8 @@ function createMenu(menuTemplate){
         }
         // Creating the eventListeners for the options menu
         // Doing this to allow hover effects and other things like that.
-        menuOptionsList.addEventListener('mouseover', e => hoverOver(e, 'in'));
-        menuOptionsList.addEventListener('mouseout', e => hoverOver(e, 'out'));
+        menuOptionsList.addEventListener('mouseover', e => hoverOver(e));
+        menuOptionsList.addEventListener('mouseout', e => hoverOver(e));
         menuOptionsList.addEventListener('click', e => menuClick(e, menuTemplate.options));
         menuContainer.appendChild(menuOptionsList);
     }
@@ -72,6 +79,14 @@ function createMenu(menuTemplate){
 }
 
 function createGame(amountOfCards){
+    gameContainer.innerHTML = '';
+    clearInterval(timerInterval);
+    activeCards = new Array();
+    currentMoves = 0;
+    starRating = 3;
+    gameStarted = false;
+    timePlayed = 0;
+
     const boardContainer = document.createElement('div');
     boardContainer.setAttribute('class', 'boardContainer');
 
@@ -80,29 +95,58 @@ function createGame(amountOfCards){
     gameHeaderTitle.innerHTML = `Memory Game!`;
     gameHeaderTitle.setAttribute('class', 'gameTitle');
     gameHeader.appendChild(gameHeaderTitle);
-
     boardContainer.appendChild(gameHeader);
+
+    const starRatingList = document.createElement('ul');
+    starRatingList.setAttribute('class', 'starRating');
+
+    for(let i = 0; i < starRating; i++){
+        const starIconContainer = document.createElement('li');
+        const startIcon = document.createElement('i');
+        startIcon.setAttribute('class', 'fa fa-star');
+        starIconContainer.appendChild(startIcon);
+        starRatingList.appendChild(starIconContainer);
+    }
+
+    gameHeader.appendChild(starRatingList);
+
+    const timer = document.createElement('p');
+    timer.setAttribute('class', 'timer');
+    timer.innerHTML = `Time : ${timePlayed}`;
+    gameHeader.appendChild(timer);
+
+    const amountOfMoves = document.createElement('p');
+    amountOfMoves.setAttribute('class', 'amountOfMoves');
+    amountOfMoves.innerHTML = `Amount of moves : ${currentMoves}`;
+    gameHeader.appendChild(amountOfMoves);
+
+    const restartButton = document.createElement('span');
+    restartButton.setAttribute('class', 'restartButton');
+    const restartButtonIcon = document.createElement('i');
+    restartButtonIcon.setAttribute('class', 'fa fa-refresh');
+    restartButton.appendChild(restartButtonIcon);
+    gameHeader.appendChild(restartButton);
+    restartButton.addEventListener('click', e => gameContainer.appendChild(createGame(amountOfCards)));
+
     // This just generates the cards array we'll be using
-    // TODO : Make the DOM elements to render the cards.
     const playingCards = generatePlayingCards(amountOfCards);
     const gameBoard = drawPlayingCards(playingCards);
 
-    let difficulty;
     switch(amountOfCards){
         case 4:
-            difficulty = 'easy';
+            gameDifficulty = 'easy';
             break;
         case 16:
-            difficulty = 'normal';
+            gameDifficulty = 'normal';
             break;
         case 20:
-            difficulty = 'hard';
+            gameDifficulty = 'hard';
             break;
         default:
             console.log('Somehow a difficulty setting wasn\'t picked');
     }
 
-    gameBoard.classList.add(difficulty);
+    gameBoard.classList.add(gameDifficulty);
     gameBoard.addEventListener('click', e => cardClick(e));
 
     boardContainer.appendChild(gameBoard);
@@ -110,6 +154,7 @@ function createGame(amountOfCards){
     return boardContainer;
 }
 
+// Making sure the DOM is loaded before trying to add things too it.
 document.addEventListener('DOMContentLoaded', e => {
     gameContainer.appendChild(createMenu(mainMenu));
 });
@@ -184,6 +229,17 @@ function cardsMatch(){
 }
 
 function cardClick(event){
+    if(!gameStarted){
+        remainingCards = document.getElementsByClassName('card');
+        const timer = document.querySelector('.timer');
+        timerInterval = setInterval(function(){
+            timePlayed++;
+            time = new Date(null);
+            time.setSeconds(timePlayed);
+            timer.innerHTML = `Time : ${time.toISOString().substr(11,8)}`;
+        }, 1000)
+        gameStarted = true;
+    }
     if(activeCards.length < 2){
         let target = event.target,
             nodeName = target.nodeName.toLowerCase();
@@ -197,18 +253,57 @@ function cardClick(event){
             }
 
             if(activeCards.length == 2){
+                currentMoves++;
+                //TODO: Change to star rating dependend on moves and difficulty.
+                const amountOfMoves = document.querySelector('.amountOfMoves');
+                amountOfMoves.innerHTML = `Amount of moves : ${currentMoves}`;
                 if(cardsMatch()){
-                    // TODO: Add some sort of class or animation to show success
+                    for(let activeCard of activeCards){
+                        activeCard.parentElement.classList.add('match');
+                    }
+                    remainingCards = Array.prototype.filter.call(remainingCards, e => e.className == 'card');
+                    if(remainingCards.length == 0){
+                        //TODO : Add a congratulations modal(moves, time, rating)
+                        // TODO : Add a play again option
+                        // TODO: Leaderboard? Save to file?
+                        let gameTime = new Date(null);
+                        gameTime.setSeconds(timePlayed);
+                        const modalContainer = document.createElement('div');
+                        modalContainer.setAttribute('class', 'modelContainer');
+
+                        const modalContent = document.createElement('div');
+                        modalContent.setAttribute('class', 'modelContent');
+
+                        const modalClose = document.createElement('span');
+                        modalClose.setAttribute('class', 'modalClose');
+                        modalContent.appendChild(modalClose);
+
+                        const modalTitle = document.createElement('h1');
+                        modalTitle.setAttribute('class', 'modalTitle');
+                        modalTitle.innerHTML = 'Congratulations';
+                        modalContent.appendChild(modalTitle);
+
+                        const modalText = document.createElement('p');
+                        modalText.setAttribute('class', 'modalText');
+                        modalText.innerHTML =  `Moves : ${currentMoves} \n Time : ${gameTime.toISOString().substr(11,8)} \n Rating : ${starRating}`;
+                        modalContent.appendChild(modalText);
+
+                        modalContainer.appendChild(modalContent);
+                        gameContainer.appendChild(modalContainer);
+                    }
                     activeCards = [];
                 }
                 else{
+                    for(let activeCard of activeCards){
+                        // TODO: Add some sort of class or animation to show fail
+                        activeCard.parentElement.classList.add('noMatch');
+                    }
                     setTimeout(function(){
                         for(let activeCard of activeCards){
-                            // TODO: Add some sort of class or animation to show fail
-                            activeCard.parentElement.classList.remove('open', 'show');
+                            activeCard.parentElement.classList.remove('open', 'show', 'noMatch');
                         }
                         activeCards = [];
-                    }, 500);
+                    }, 1000);
 
                 }
             }
@@ -234,14 +329,16 @@ function menuClick(event, menuOptions){
     }
 }
 
+
 // This is the event handler for hovering over the menu options
 // It checks if you're hovering over and li or h3 inside a list
 
-function hoverOver(event, inOrOut){
+function hoverOver(event){
     let target = event.target,
+        type = event.type,
         nodeName = target.nodeName.toLowerCase();
     if(nodeName == 'li' || nodeName == 'h3'){
-        if(inOrOut == 'in'){
+        if(type == 'mouseover'){
             if(!target.classList.contains('hovered')){
                 if(nodeName == 'h3')
                     target = target.parentElement;
@@ -249,7 +346,7 @@ function hoverOver(event, inOrOut){
             }
             else return;
         }
-        else if(inOrOut == 'out'){
+        else if(type == 'mouseout'){
             if(target.classList.contains('hovered')){
                 target.classList.remove('hovered');
             }

@@ -1,4 +1,43 @@
 /*
+    MEDIA QUERIES
+*/
+
+@media screen and (max-width: 400px){
+
+    /*
+        INSTRUCTIONS
+    */
+
+    .instructionsContainer {
+        overflow-y: scroll;
+    }
+
+    /*
+        CLASSES FOR DIFFICULTY
+    */
+
+    .gameBoard.easy, .gameBoard.normal, .gameBoard.hard {
+        width: 250px !important;
+        min-height: 250px !important;
+    }
+
+    .gameBoard.easy .card {
+        height: 90px !important;
+        width: 90px !important;
+    }
+
+    .gameBoard.normal .card {
+        height: 60px !important;
+        width: 60px !important;
+    }
+
+    .gameBoard.hard .card {
+        height: 45px !important;
+        width: 45px !important;
+    }
+}
+
+/*
     GLOBAL
 */
 
@@ -22,11 +61,6 @@ body {
     INSTRUCTIONS
 */
 
-@media screen and (max-width: 400px){
-    .instructionsContainer {
-        overflow-y: scroll;
-    }
-}
 .instructionsContainer {
     padding: 30px;
 }
@@ -142,6 +176,34 @@ body {
     border-radius: 10px;
     background: #ada8ad;
 }
+.gameBoard .card.match {
+    background: #02e4b3;
+}
+
+.gameBoard .card.noMatch {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
 
 
 /*
@@ -149,16 +211,15 @@ body {
 */
 
 .gameBoard.easy {
-    width: 300px !important;
+    width: 300px;
 }
 
 .gameBoard.normal {
-    width: 550px !important;
+    width: 550px;
     min-height: 550px;
 }
 
 .gameBoard.hard {
-    width: 660px !important;
+    width: 660px;
     min-height: 660px;
-
 }
