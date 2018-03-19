@@ -261,7 +261,7 @@ function cardClick(event){
             if(activeCards.length == 2){
                 currentMoves++;
                 if(currentMoves > maxMoves && starRating > 0){
-                    starRating -= 0.5;
+                    starRating -= 1;
                     let starRatingList = document.querySelector('.starRating');
                     starRatingList.innerHTML = '';
                     for(let i = 0; i < 3; i ++){
@@ -269,9 +269,6 @@ function cardClick(event){
                         const startIcon = document.createElement('i');
                         if(i == 2){
                             switch(true){
-                                case (starRating == 2.5):
-                                    icon = 'fa fa-star-half-o';
-                                    break;
                                 case (starRating <= 2):
                                     icon = 'fa fa-star-o';
                                     break;
@@ -280,9 +277,6 @@ function cardClick(event){
                             }
                         }else if(i == 1){
                             switch(true){
-                                case (starRating == 1.5):
-                                    icon = 'fa fa-star-half-o';
-                                    break;
                                 case (starRating <= 1):
                                     icon = 'fa fa-star-o';
                                     break;
