@@ -1,3 +1,14 @@
+var activeCards,
+    currentMoves,
+    starRating,
+    gameDifficulty,
+    gameStarted,
+    remainingCards,
+    timePlayed,
+    timerInterval,
+    minMoves,
+    maxMoves;
+
 const gameContainer = document.getElementById('gameContainer');
 
 const cards = [
@@ -18,9 +29,9 @@ const cards = [
 const difficultyMenu = {
     title: 'Difficulty',
     options : {
-        'Easy' : createGame(4),
-        'Normal' : createGame(16),
-        'Hard' : createGame(20)
+        'Easy' : '',
+        'Normal' : '',
+        'Hard' : ''
     }
 };
 const mainMenu = {
@@ -31,14 +42,21 @@ const mainMenu = {
     }
 };
 
-var activeCards,
-    currentMoves,
-    starRating,
-    gameDifficulty,
-    gameStarted,
-    remainingCards,
-    timePlayed,
-    timerInterval;
+const modalMenu = {
+    title : 'Congratulations',
+    options : {
+        'Play Again' : '', // TODO: Figure out how to recreate the same game, right now it just creates a new random game.
+        'Menu' : ''
+    }
+}
+
+const gameOver = {
+    title : 'Game Over!',
+    options : {
+        'Play Again' : '',
+        'Menu' : ''
+    }
+}
 
 // Trying to dynamically create menus.
 // Will return the DOM object needed to append straight to the body.
@@ -86,6 +104,8 @@ function createGame(amountOfCards){
     starRating = 3;
     gameStarted = false;
     timePlayed = 0;
+    minMoves = amountOfCards;
+    maxMoves = (amountOfCards / 2) + (amountOfCards / 4);
 
     const boardContainer = document.createElement('div');
     boardContainer.setAttribute('class', 'boardContainer');
@@ -131,20 +151,6 @@ function createGame(amountOfCards){
     // This just generates the cards array we'll be using
     const playingCards = generatePlayingCards(amountOfCards);
     const gameBoard = drawPlayingCards(playingCards);
-
-    switch(amountOfCards){
-        case 4:
-            gameDifficulty = 'easy';
-            break;
-        case 16:
-            gameDifficulty = 'normal';
-            break;
-        case 20:
-            gameDifficulty = 'hard';
-            break;
-        default:
-            console.log('Somehow a difficulty setting wasn\'t picked');
-    }
 
     gameBoard.classList.add(gameDifficulty);
     gameBoard.addEventListener('click', e => cardClick(e));
@@ -254,48 +260,71 @@ function cardClick(event){
 
             if(activeCards.length == 2){
                 currentMoves++;
-                //TODO: Change to star rating dependend on moves and difficulty.
+                if(currentMoves > maxMoves && starRating > 0){
+                    starRating -= 0.5;
+                    let starRatingList = document.querySelector('.starRating');
+                    starRatingList.innerHTML = '';
+                    for(let i = 0; i < 3; i ++){
+                        const starIconContainer = document.createElement('li');
+                        const startIcon = document.createElement('i');
+                        if(i == 2){
+                            switch(true){
+                                case (starRating == 2.5):
+                                    icon = 'fa fa-star-half-o';
+                                    break;
+                                case (starRating <= 2):
+                                    icon = 'fa fa-star-o';
+                                    break;
+                                default:
+                                    icon = 'fa fa-star'
+                            }
+                        }else if(i == 1){
+                            switch(true){
+                                case (starRating == 1.5):
+                                    icon = 'fa fa-star-half-o';
+                                    break;
+                                case (starRating <= 1):
+                                    icon = 'fa fa-star-o';
+                                    break;
+                                default:
+                                    icon = 'fa fa-star'
+                            }
+                        }else{
+                            switch(true){
+                                case (starRating == 0.5):
+                                    icon = 'fa fa-star-half-o';
+                                    break;
+                                case (starRating <= 0):
+                                    icon = 'fa fa-star-o';
+                                    break;
+                                default:
+                                    icon = 'fa fa-star'
+                            }
+                        }
+                        console.log(icon);
+                        startIcon.setAttribute('class', icon);
+
+                        starIconContainer.appendChild(startIcon);
+                        starRatingList.appendChild(starIconContainer);
+                    }
+                }
+
+                if(starRating == 0){
+                    gameContainer.appendChild(createMenu(gameOver));
+                }
                 const amountOfMoves = document.querySelector('.amountOfMoves');
                 amountOfMoves.innerHTML = `Amount of moves : ${currentMoves}`;
                 if(cardsMatch()){
                     for(let activeCard of activeCards){
                         activeCard.parentElement.classList.add('match');
                     }
+
+                    // Removing all cards from remainingCards if they have more than the className 'card', eg. .open ect.
                     remainingCards = Array.prototype.filter.call(remainingCards, e => e.className == 'card');
-                    if(remainingCards.length == 0){
-                        //TODO : Add a congratulations modal(moves, time, rating)
-                        // TODO : Add a play again option
-                        // TODO: Leaderboard? Save to file?
-                        let gameTime = new Date(null);
-                        gameTime.setSeconds(timePlayed);
-                        const modalContainer = document.createElement('div');
-                        modalContainer.setAttribute('class', 'modelContainer');
-
-                        const modalContent = document.createElement('div');
-                        modalContent.setAttribute('class', 'modelContent');
-
-                        const modalClose = document.createElement('span');
-                        modalClose.setAttribute('class', 'modalClose');
-                        modalContent.appendChild(modalClose);
-
-                        const modalTitle = document.createElement('h1');
-                        modalTitle.setAttribute('class', 'modalTitle');
-                        modalTitle.innerHTML = 'Congratulations';
-                        modalContent.appendChild(modalTitle);
-
-                        const modalText = document.createElement('p');
-                        modalText.setAttribute('class', 'modalText');
-                        modalText.innerHTML =  `Moves : ${currentMoves} \n Time : ${gameTime.toISOString().substr(11,8)} \n Rating : ${starRating}`;
-                        modalContent.appendChild(modalText);
-
-                        modalContainer.appendChild(modalContent);
-                        gameContainer.appendChild(modalContainer);
-                    }
                     activeCards = [];
                 }
                 else{
                     for(let activeCard of activeCards){
-                        // TODO: Add some sort of class or animation to show fail
                         activeCard.parentElement.classList.add('noMatch');
                     }
                     setTimeout(function(){
@@ -308,6 +337,35 @@ function cardClick(event){
                 }
             }
         }
+        if(remainingCards.length == 0){
+            // TODO: Leaderboard? Save to file?
+
+            clearInterval(timerInterval);
+            let gameTime = new Date(null);
+            gameTime.setSeconds(timePlayed);
+
+            const modalMenuElement = createMenu(modalMenu);
+            const modalContainer = document.createElement('div');
+            modalContainer.setAttribute('class', 'modalContainer');
+
+            const modalContent = document.createElement('div');
+            modalContent.setAttribute('class', 'modalContent');
+
+            const modalClose = document.createElement('span');
+            modalClose.setAttribute('class', 'modalClose');
+            modalContent.appendChild(modalClose);
+
+            const modalText = document.createElement('p');
+            modalText.setAttribute('class', 'modalText');
+            // TODO: Make the starRating display as the starIcons instead of the number.
+            modalText.innerHTML =  `Moves : ${currentMoves} \n Time : ${gameTime.toISOString().substr(11,8)} \n Rating : ${starRating}`;
+            modalContent.appendChild(modalText);
+
+            modalContainer.appendChild(modalContent);
+            modalMenuElement.insertBefore(modalContainer, modalMenuElement.childNodes[0].nextSibling);
+            modalMenuElement.classList.add('modalMenu');
+            gameContainer.appendChild(modalMenuElement);
+        }
     }
 }
 
@@ -315,6 +373,7 @@ function cardClick(event){
 function menuClick(event, menuOptions){
     let target = event.target,
           nodeName = target.nodeName.toLowerCase();
+          console.log
     if(nodeName == 'li' || nodeName == 'h3'){
         gameContainer.innerHTML = '';
         if(nodeName == 'li'){
@@ -322,6 +381,32 @@ function menuClick(event, menuOptions){
         }
         if(menuOptions['Instructions'] && target.innerHTML == 'Instructions'){
             window.location.href = menuOptions['Instructions'];
+        }
+        else if(target.innerHTML == 'Menu'){
+            location.reload();
+        }
+        else if(target.innerHTML == 'Easy' || target.innerHTML == 'Normal' || target.innerHTML == 'Hard'){
+            let game;
+            switch(target.innerHTML){
+                case 'Easy':
+                    gameDifficulty = 'easy';
+                    game = createGame(4);
+                    break;
+                case 'Normal':
+                    gameDifficulty = 'normal';
+                    game = createGame(16);
+                    break
+                case 'Hard':
+                    gameDifficulty = 'hard';
+                    game = createGame(20);
+                    break;
+                default:
+                    console.error('Somehow a difficulty setting wasn\'t pressed');
+            }
+            gameContainer.appendChild(game);
+        }
+        else if(target.innerHTML == 'Play Again'){
+             gameContainer.appendChild(createGame(cardAmount = gameDifficulty == 'easy' ? 4 : gameDifficulty == 'normal' ? 16 : 20))
         }
         else{
             gameContainer.appendChild(menuOptions[target.innerHTML]);
@@ -331,7 +416,7 @@ function menuClick(event, menuOptions){
 
 
 // This is the event handler for hovering over the menu options
-// It checks if you're hovering over and li or h3 inside a list
+// It checks if you're hovering over and li or h3 inside the menuOptionsList
 
 function hoverOver(event){
     let target = event.target,

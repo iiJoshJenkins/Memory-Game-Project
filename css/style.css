@@ -223,3 +223,28 @@ body {
     width: 660px;
     min-height: 660px;
 }
+
+
+/*
+    MODAL MENU
+*/
+
+.modalMenu {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: #2e3d49;
+    opacity: 0.8;
+}
+
+/* Modal Content/Box */
+.modalContent {
+    text-align: center;
+    background: #2e3d49;
+    margin: 15% auto;
+    padding: 20px;
+    width: 80%;
+}
