@@ -290,16 +290,7 @@ function cardClick(event){
                                     icon = 'fa fa-star'
                             }
                         }else{
-                            switch(true){
-                                case (starRating == 0.5):
-                                    icon = 'fa fa-star-half-o';
-                                    break;
-                                case (starRating <= 0):
-                                    icon = 'fa fa-star-o';
-                                    break;
-                                default:
-                                    icon = 'fa fa-star'
-                            }
+                            icon = 'fa fa-star'
                         }
                         console.log(icon);
                         startIcon.setAttribute('class', icon);
@@ -309,7 +300,7 @@ function cardClick(event){
                     }
                 }
 
-                if(starRating == 0){
+                if(starRating == 1){
                     gameContainer.appendChild(createMenu(gameOver));
                 }
                 const amountOfMoves = document.querySelector('.amountOfMoves');
